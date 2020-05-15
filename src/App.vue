@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <el-button>999</el-button>
+    <router-view/>
   </div>
 </template>
 
@@ -9,14 +9,20 @@
     name: 'app',
     components: {},
     data() {
-      return {
-      }
+      return {}
     },
-    methods:{
-    }
+    methods: {}
   }
 </script>
 
-<style lang="scss" scoped>
-
+<style lang="scss">
+  * {
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+  }
+  html,body,#app{
+    width: 100%;
+    height: 100%;
+  }
 </style>
