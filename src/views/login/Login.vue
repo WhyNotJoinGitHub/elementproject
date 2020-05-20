@@ -48,6 +48,7 @@
         this.$refs.loginFormRef.resetFields();
       },
       login() {
+        this.$message.closeAll();
         this.$refs.loginFormRef.validate(async (valid) => {
           if (!valid) return;
           //数据的解构赋值

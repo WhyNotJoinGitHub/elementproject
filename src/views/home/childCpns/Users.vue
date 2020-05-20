@@ -37,12 +37,9 @@
         </el-table-column>
         <el-table-column label="操作" width="180">
           <template v-slot="scope">
-            <el-tooltip effect="dark" content="编辑" placement="top" :enterable="false">
-              <el-button type="primary" icon="el-icon-edit" size="mini" @click="editUserInfo(scope.row.id)"></el-button>
-            </el-tooltip>
-            <el-tooltip effect="dark" content="删除" placement="top" :enterable="false">
-              <el-button type="danger" icon="el-icon-delete" size="mini" @click="deleteUserInfo(scope.row.id)"></el-button>
-            </el-tooltip>
+            <el-button type="primary" icon="el-icon-edit" size="mini" @click="editUserInfo(scope.row.id)"></el-button>
+            <el-button type="danger" icon="el-icon-delete" size="mini"
+                       @click="deleteUserInfo(scope.row.id)"></el-button>
             <el-tooltip effect="dark" content="分配角色" placement="top" :enterable="false">
               <el-button type="warning" icon="el-icon-setting" size="mini"></el-button>
             </el-tooltip>
@@ -297,12 +294,18 @@
       },
 
       //点击按钮删除用户信息
-      deleteUserInfo(id){
-        this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
+      async deleteUserInfo(id) {
+        this.$message.closeAll();
+        const confirmResult = await this.$confirm('此操作将永久删除该用户, 是否继续?', '提示', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
           type: 'warning'
-        }).then().catch()
+        }).catch(error => error)
+        if (confirmResult !== "confirm") {
+          return this.$message.info("取消了删除")
+        }
+        const {data: res} = await this.$http.delete('users/' + id)
+        console.log(res);
       }
     }
   }
