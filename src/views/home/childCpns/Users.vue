@@ -305,7 +305,13 @@
           return this.$message.info("取消了删除")
         }
         const {data: res} = await this.$http.delete('users/' + id)
-        console.log(res);
+        if(res.meta.status !==200) return this.$message.error("删除用户失败")
+        this.$message.success("删除用户成功")
+
+        //回到第一页
+        this.queryInfo.pagenum = 1;
+        //刷新数据
+        await this.getUserList()
       }
     }
   }
