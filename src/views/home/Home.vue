@@ -94,38 +94,4 @@
   .home-container {
     height: 100%;
   }
-
-  .el-header {
-    background-color: #373d41;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    color: #fff;
-    font-size: 16px;
-  }
-
-  .el-aside {
-    background-color: #333744;
-
-    .toggle-btn {
-      background-color: #4a5064;
-      font-size: 18px;
-      color: #fff;
-      text-align: center;
-      line-height: 30px;
-      cursor: pointer;
-    }
-  }
-
-  .el-main {
-    background-color: #eaedf1;
-  }
-
-  .el-menu {
-    border-right: 0;
-  }
-
-  .el-submenu__title {
-    color: #fff;
-  }
 </style>
