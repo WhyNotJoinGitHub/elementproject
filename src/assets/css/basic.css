@@ -42,6 +42,7 @@ html,body,#app{
 .el-main {
   background-color: #eaedf1;
   min-width: 1200px;
+  height: calc(100vh - 60px);
 }
 
 .el-menu {
