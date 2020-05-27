@@ -25,6 +25,9 @@
         </el-col>
       </el-row>
       <el-table :data="userList" border>
+        <template slot="empty">
+           <img src="~assets/img/no-data.png" alt="">
+        </template>
         <el-table-column type="index" label="序号" width="60"></el-table-column>
         <el-table-column prop="username" label="姓名"></el-table-column>
         <el-table-column prop="email" label="邮箱"></el-table-column>
