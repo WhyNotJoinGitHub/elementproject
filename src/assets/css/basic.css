@@ -15,7 +15,8 @@ html,body,#app{
 .el-card.is-always-shadow{
   box-shadow: 0 1px 0 rgba(0,0,0,.15);
 }
-.el-table{
+.el-table,
+.zk-table{
   margin-top: 15px;
 }
 
@@ -59,4 +60,7 @@ html,body,#app{
   height: calc(100vh - 110px);
   overflow: hidden;
   overflow-y: scroll;
+}
+.el-cascader-menu{
+  height: 300px;
 }
