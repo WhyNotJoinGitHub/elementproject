@@ -70,7 +70,7 @@
       </el-form>
       <span slot="footer" class="dialog-footer">
     <el-button @click="addCategoryDialogVisible = false">取 消</el-button>
-    <el-button type="primary" @click="addCategoryDialogVisible = false">确 定</el-button>
+    <el-button type="primary" @click="confirmAddCategory">确 定</el-button>
   </span>
     </el-dialog>
   </div>
@@ -126,14 +126,15 @@
           ],
         },
         ParentsCategoryList: [],
-        selectCategory:'',
-        ParentsCategoryProps:{
-          expandTrigger:'hover',
-          checkStrictly:true,
-          value:'cat_id',
-          label:'cat_name',
-          children:'children'
-        }
+        selectCategory: '',
+        ParentsCategoryProps: {
+          expandTrigger: 'hover',
+          checkStrictly: true,
+          value: 'cat_id',
+          label: 'cat_name',
+          children: 'children'
+        },
+        cascader: {}
       }
     },
     created() {
@@ -180,8 +181,16 @@
 
       //下拉菜单获取值
       handleChange() {
-        console.log(this.selectCategory);
-      }
+        // console.log(this.selectCategory);
+        console.log(this.selectCategory.length);
+        if (this.selectCategory.length > 0) {
+          this.addCategoryForm.cat_pid = this.selectCategory[this.selectCategory.length - 1]
+          console.log(this.addCategoryForm.cat_pid);
+        }
+      },
+      //确定添加分类事件
+      confirmAddCategory() {
+      },
     }
   }
 </script>
