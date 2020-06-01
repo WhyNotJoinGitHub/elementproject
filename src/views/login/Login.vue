@@ -53,13 +53,13 @@
           if (!valid) return;
           //数据的解构赋值
           const {data: result} = await this.$http.post("login", this.loginForm)
-          if (result.meta.status!==200) return this.$message({
-            type:'error',
-            message:'账号或密码错误，登录失败！',
-            duration:'3000'
+          if (result.meta.status !== 200) return this.$message({
+            type: 'error',
+            message: '账号或密码错误，登录失败！',
+            duration: '3000'
           })
           this.$message.success("登录成功！")
-          sessionStorage.setItem("token",result.data.token)
+          sessionStorage.setItem("token", result.data.token)
           await this.$router.replace('/home')
         })
       }
@@ -79,7 +79,7 @@
     width: 360px;
     height: 300px;
     margin: auto;
-    padding: 20px;
+    padding: 70px 20px 20px;
     background: #fff;
     border-radius: 10px;
     position: absolute;

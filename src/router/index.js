@@ -7,7 +7,9 @@ const Welcome = () => import('views/home/childCpns/Welcome')
 const Users = () => import('views/home/childCpns/userManage/Users')
 const Rights = () => import('views/home/childCpns/powerManage/Rights')
 const Roles = () => import('views/home/childCpns/powerManage/Roles')
-const Categories = () => import('views/home/childCpns/goodsManage/categories')
+const Categories = () => import('views/home/childCpns/goodsManage/Categories')
+const Params = () => import('views/home/childCpns/goodsManage/Params')
+const Goods = () => import('views/home/childCpns/goodsManage/Goods')
 Vue.use(VueRouter)
 const routes = [
   {
@@ -42,6 +44,14 @@ const routes = [
       {
         path: '/categories',
         component: Categories
+      },
+      {
+        path: '/params',
+        component: Params
+      },
+      {
+        path: '/goods',
+        component: Goods
       }
     ]
   }
