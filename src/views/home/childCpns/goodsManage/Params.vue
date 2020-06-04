@@ -21,14 +21,29 @@
       </el-row>
       <el-tabs v-model="activeName" @tab-click="handleClick">
         <el-tab-pane label="动态参数" name="many">
-          <el-button type="primary" size="mini" :disabled="isDisabled">添加参数</el-button>
+          <el-button type="primary" size="mini" :disabled="isDisabled" @click="addParams">添加参数</el-button>
           <el-table :data="manyTableData" border style="width: 100%">
             <template slot="empty">
               <img src="~assets/img/no-data.png" alt />
             </template>
             <el-table-column type="expand" width="80">
               <template v-slot="scop">
-                <el-tag v-for="(tag,index) in scop.row.attr_vals" :key="index" closable>{{tag}}</el-tag>
+                <el-tag
+                  v-for="(tag,index) in scop.row.attr_vals"
+                  :key="index"
+                  closable
+                  @close="handleClose(scop.row)"
+                >{{tag}}</el-tag>
+                <el-input
+                  class="tag-input"
+                  v-if="inputVisible"
+                  v-model="inputValue"
+                  ref="saveTagInput"
+                  size="small"
+                  @keyup.enter.native="handleInputConfirm(scop.row.attr_vals)"
+                  @blur="handleInputConfirm(scop.row.attr_vals)"
+                ></el-input>
+                <el-button v-else class="button-new-tag" size="small" @click="showInput">+ New Tag</el-button>
               </template>
             </el-table-column>
             <el-table-column type="index" label="序号" width="80"></el-table-column>
@@ -40,7 +55,7 @@
           </el-table>
         </el-tab-pane>
         <el-tab-pane label="静态属性" name="only">
-          <el-button type="primary" size="mini" :disabled="isDisabled">添加属性</el-button>
+          <el-button type="primary" size="mini" :disabled="isDisabled" @click="addParams">添加属性</el-button>
           <el-table :data="onlyTableData" border style="width: 100%">
             <template slot="empty">
               <img src="~assets/img/no-data.png" alt />
@@ -48,6 +63,16 @@
             <el-table-column type="expand" width="80">
               <template v-slot="scop">
                 <el-tag v-for="(tag,index) in scop.row.attr_vals" :key="index" closable>{{tag}}</el-tag>
+                <el-input
+                  class="tag-input"
+                  v-if="inputVisible"
+                  v-model="inputValue"
+                  ref="saveTagInput"
+                  size="small"
+                  @keyup.enter.native="handleInputConfirm(scop.row.attr_vals)"
+                  @blur="handleInputConfirm(scop.row.attr_vals)"
+                ></el-input>
+                <el-button v-else class="button-new-tag" size="small" @click="showInput">+ New Tag</el-button>
               </template>
             </el-table-column>
             <el-table-column type="index" label="序号" width="80"></el-table-column>
@@ -60,6 +85,23 @@
         </el-tab-pane>
       </el-tabs>
     </el-card>
+    <!-- 添加属性或添加参数弹窗 -->
+    <el-dialog
+      :title="'添加'+ dialogTitle"
+      :visible.sync="dialogVisible"
+      width="50%"
+      @close="addParamsFormClosed"
+    >
+      <el-form :model="addParamsForm" :rules="addRules" ref="addParamsFormRef" label-width="100px">
+        <el-form-item :label="dialogTitle" prop="attr_name">
+          <el-input v-model="addParamsForm.attr_name"></el-input>
+        </el-form-item>
+      </el-form>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="dialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="submitForm">确 定</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
@@ -78,7 +120,21 @@ export default {
       },
       activeName: "many",
       manyTableData: [],
-      onlyTableData: []
+      onlyTableData: [],
+      // 待删除开始
+      inputVisible: false,
+      inputValue: "",
+      // 待删除结束
+      dialogVisible: false,
+      addParamsForm: {
+        attr_name: ""
+      },
+      addRules: {
+        attr_name: [
+          { required: true, message: "请输入参数名称", trigger: "blur" },
+          { min: 3, message: "最少3个字符", trigger: "blur" }
+        ]
+      }
     };
   },
   created() {
@@ -117,12 +173,43 @@ export default {
       res.data.forEach(item => {
         item.attr_vals = item.attr_vals ? item.attr_vals.split(" ") : [];
       });
-      console.log(res.data);
       if (this.activeName == "many") {
         this.manyTableData = res.data;
       } else {
         this.onlyTableData = res.data;
       }
+    },
+    //添加参数、属性弹窗
+    addParams() {
+      this.dialogVisible = true;
+    },
+    //添加参数、属性弹窗关闭
+    addParamsFormClosed() {
+      this.$refs.addParamsFormRef.resetFields();
+    },
+    // 提交添加参数、属性弹窗
+    submitForm() {
+      this.$refs.addParamsFormRef.validate(valid => {
+        console.log(valid);
+      });
+    },
+    //删除参数
+    handleClose(row) {},
+    //添加下拉参数
+    handleInputConfirm(attr) {
+      let inputValue = this.inputValue;
+      if (inputValue) {
+        attr.push(inputValue);
+      }
+      this.inputVisible = false;
+      this.inputValue = "";
+    },
+    //点击tag新增参数
+    showInput() {
+      this.inputVisible = true;
+      this.$nextTick(_ => {
+        this.$refs.saveTagInput.$refs.input.focus();
+      });
     }
   },
   computed: {
@@ -135,6 +222,14 @@ export default {
         return this.selectData[2];
       }
       return null;
+    },
+    //弹窗标题
+    dialogTitle() {
+      if (this.activeName == "many") {
+        return "动态参数";
+      } else {
+        return "静态属性";
+      }
     }
   }
 };
@@ -146,5 +241,8 @@ export default {
 }
 .el-tag {
   margin: 5px;
+}
+.tag-input {
+  width: 100px;
 }
 </style>
