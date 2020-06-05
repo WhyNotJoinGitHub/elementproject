@@ -49,8 +49,15 @@
             <el-table-column type="index" label="序号" width="80"></el-table-column>
             <el-table-column prop="attr_name" label="参数名称"></el-table-column>
             <el-table-column label="操作">
-              <el-button type="primary" icon="el-icon-edit" size="mini">编辑</el-button>
-              <el-button type="danger" icon="el-icon-delete" size="mini">删除</el-button>
+              <template v-slot="scop">
+                <el-button
+                  type="primary"
+                  icon="el-icon-edit"
+                  size="mini"
+                  @click="editParams(scop.row.attr_id)"
+                >编辑</el-button>
+                <el-button type="danger" icon="el-icon-delete" size="mini">删除</el-button>
+              </template>
             </el-table-column>
           </el-table>
         </el-tab-pane>
@@ -78,8 +85,15 @@
             <el-table-column type="index" label="序号" width="80"></el-table-column>
             <el-table-column prop="attr_name" label="属性名称"></el-table-column>
             <el-table-column label="操作">
-              <el-button type="primary" icon="el-icon-edit" size="mini">编辑</el-button>
-              <el-button type="danger" icon="el-icon-delete" size="mini">删除</el-button>
+              <template v-slot="scop">
+                <el-button
+                  type="primary"
+                  icon="el-icon-edit"
+                  size="mini"
+                  @click="editParams(scop.row.attr_id)"
+                >编辑</el-button>
+                <el-button type="danger" icon="el-icon-delete" size="mini">删除</el-button>
+              </template>
             </el-table-column>
           </el-table>
         </el-tab-pane>
@@ -87,13 +101,13 @@
     </el-card>
     <!-- 添加属性或添加参数弹窗 -->
     <el-dialog
-      :title="'添加'+ dialogTitle"
+      :title="this.halfTitle + addDialogTitle"
       :visible.sync="dialogVisible"
       width="50%"
       @close="addParamsFormClosed"
     >
       <el-form :model="addParamsForm" :rules="addRules" ref="addParamsFormRef" label-width="100px">
-        <el-form-item :label="dialogTitle" prop="attr_name">
+        <el-form-item :label="addDialogTitle" prop="attr_name">
           <el-input v-model="addParamsForm.attr_name"></el-input>
         </el-form-item>
       </el-form>
@@ -131,10 +145,12 @@ export default {
       },
       addRules: {
         attr_name: [
-          { required: true, message: "请输入参数名称", trigger: "blur" },
+          { required: true, message: "", trigger: "blur" },
           { min: 3, message: "最少3个字符", trigger: "blur" }
         ]
-      }
+      },
+      halfTitle: "",
+      attrId: ""
     };
   },
   created() {
@@ -179,19 +195,77 @@ export default {
         this.onlyTableData = res.data;
       }
     },
-    //添加参数、属性弹窗
+    //添加参数、属性弹窗展示
     addParams() {
+      this.halfTitle = "添加";
+      this.addRules.attr_name[0].message = "请输入" + this.addDialogTitle;
       this.dialogVisible = true;
     },
     //添加参数、属性弹窗关闭
     addParamsFormClosed() {
+      this.halfTitle = "";
       this.$refs.addParamsFormRef.resetFields();
     },
-    // 提交添加参数、属性弹窗
+    // 确认提交添加参数、属性弹窗
     submitForm() {
-      this.$refs.addParamsFormRef.validate(valid => {
-        console.log(valid);
+      if (this.halfTitle == "添加") {
+        this.requestAddParams();
+      } else {
+        this.requestEditParams();
+      }
+    },
+    //添加参数、属性的数据请求
+    requestAddParams() {
+      this.$refs.addParamsFormRef.validate(async valid => {
+        if (!valid) return false;
+        const { data: res } = await this.$http.post(
+          `categories/${this.cateId}/attributes`,
+          {
+            attr_name: this.addParamsForm.attr_name,
+            attr_sel: this.activeName
+          }
+        );
+        if (res.meta.status !== 201)
+          return this.$message.error(this.addDialogTitle + "添加失败！");
+        this.$message.success(this.addDialogTitle + "添加成功！");
+        this.dialogVisible = false;
+        await this.getParamsList();
       });
+    },
+    //编辑参数、属性的数据请求
+    requestEditParams() {
+      this.$refs.addParamsFormRef.validate(async valid => {
+        if (!valid) return false;
+        const { data: res } = await this.$http.put(
+          `categories/${this.cateId}/attributes/${this.attrId}`,
+          {
+            attr_name: this.addParamsForm.attr_name,
+            attr_sel: this.activeName
+          }
+        );
+        if (res.meta.status !== 200)
+          return this.$message.error(this.addDialogTitle + "编辑失败！");
+        this.$message.success(this.addDialogTitle + "编辑成功！");
+        this.dialogVisible = false;
+        await this.getParamsList();
+      });
+    },
+    //编辑参数、属性
+    async editParams(id) {
+      this.attrId = id;
+      this.halfTitle = "编辑";
+      this.addRules.attr_name[0].message = "请输入" + this.addDialogTitle;
+      this.dialogVisible = true;
+      const { data: res } = await this.$http.get(
+        `categories/${this.cateId}/attributes/${id}`,
+        {
+          params: {
+            attr_sel: this.activeName
+          }
+        }
+      );
+      if (res.meta.status !== 200) return this.$message.error("获取参数失败！");
+      this.addParamsForm.attr_name = res.data.attr_name;
     },
     //删除参数
     handleClose(row) {},
@@ -223,12 +297,20 @@ export default {
       }
       return null;
     },
-    //弹窗标题
-    dialogTitle() {
+    //添加参数、属性的弹窗标题
+    addDialogTitle() {
       if (this.activeName == "many") {
         return "动态参数";
       } else {
         return "静态属性";
+      }
+    },
+    //编辑参数、属性的弹窗标题
+    editDialogTitle() {
+      if (this.activeName == "many") {
+        return "编辑参数";
+      } else {
+        return "编辑属性";
       }
     }
   }
