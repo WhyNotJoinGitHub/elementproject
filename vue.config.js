@@ -20,6 +20,4 @@ module.exports = {
       .set('network', resolve('src/network'))
   },
   lintOnSave: true,
-
-  devtool: 'source-map'
 }

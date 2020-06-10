@@ -32,18 +32,23 @@
                   v-for="(tag,index) in scop.row.attr_vals"
                   :key="index"
                   closable
-                  @close="handleClose(scop.row)"
+                  @close="handleClose(index, scop.row)"
                 >{{tag}}</el-tag>
                 <el-input
                   class="tag-input"
-                  v-if="inputVisible"
-                  v-model="inputValue"
+                  v-if="scop.row.inputVisible"
+                  v-model="scop.row.inputValue"
                   ref="saveTagInput"
                   size="small"
-                  @keyup.enter.native="handleInputConfirm(scop.row.attr_vals)"
-                  @blur="handleInputConfirm(scop.row.attr_vals)"
+                  @keyup.enter.native="handleInputConfirm(scop.row)"
+                  @blur="handleInputConfirm(scop.row)"
                 ></el-input>
-                <el-button v-else class="button-new-tag" size="small" @click="showInput">+ New Tag</el-button>
+                <el-button
+                  v-else
+                  class="button-new-tag"
+                  size="small"
+                  @click="showInput(scop.row)"
+                >+ New Tag</el-button>
               </template>
             </el-table-column>
             <el-table-column type="index" label="序号" width="80"></el-table-column>
@@ -69,17 +74,27 @@
             </template>
             <el-table-column type="expand" width="80">
               <template v-slot="scop">
-                <el-tag v-for="(tag,index) in scop.row.attr_vals" :key="index" closable>{{tag}}</el-tag>
+                <el-tag
+                  v-for="(tag,index) in scop.row.attr_vals"
+                  :key="index"
+                  closable
+                  @close="handleClose(scop.row)"
+                >{{tag}}</el-tag>
                 <el-input
                   class="tag-input"
-                  v-if="inputVisible"
-                  v-model="inputValue"
+                  v-if="scop.row.inputVisible"
+                  v-model="scop.row.inputValue"
                   ref="saveTagInput"
                   size="small"
-                  @keyup.enter.native="handleInputConfirm(scop.row.attr_vals)"
-                  @blur="handleInputConfirm(scop.row.attr_vals)"
+                  @keyup.enter.native="handleInputConfirm(scop.row)"
+                  @blur="handleInputConfirm(scop.row)"
                 ></el-input>
-                <el-button v-else class="button-new-tag" size="small" @click="showInput">+ New Tag</el-button>
+                <el-button
+                  v-else
+                  class="button-new-tag"
+                  size="small"
+                  @click="showInput(scop.row)"
+                >+ New Tag</el-button>
               </template>
             </el-table-column>
             <el-table-column type="index" label="序号" width="80"></el-table-column>
@@ -135,10 +150,6 @@ export default {
       activeName: "many",
       manyTableData: [],
       onlyTableData: [],
-      // 待删除开始
-      inputVisible: false,
-      inputValue: "",
-      // 待删除结束
       dialogVisible: false,
       addParamsForm: {
         attr_name: ""
@@ -185,9 +196,10 @@ export default {
       );
       if (res.meta.status !== 200)
         return this.$message.error("获取分类参数失败！");
-
       res.data.forEach(item => {
         item.attr_vals = item.attr_vals ? item.attr_vals.split(" ") : [];
+        item.inputVisible = false;
+        item.inputValue = "";
       });
       if (this.activeName == "many") {
         this.manyTableData = res.data;
@@ -267,23 +279,43 @@ export default {
       if (res.meta.status !== 200) return this.$message.error("获取参数失败！");
       this.addParamsForm.attr_name = res.data.attr_name;
     },
-    //删除参数
-    handleClose(row) {},
-    //添加下拉参数
-    handleInputConfirm(attr) {
-      let inputValue = this.inputValue;
-      if (inputValue) {
-        attr.push(inputValue);
-      }
-      this.inputVisible = false;
-      this.inputValue = "";
-    },
-    //点击tag新增参数
-    showInput() {
-      this.inputVisible = true;
+    //点击tag展示文本输入框
+    showInput(row) {
+      row.inputVisible = true;
       this.$nextTick(_ => {
         this.$refs.saveTagInput.$refs.input.focus();
       });
+    },
+    //添加下拉参数
+    handleInputConfirm(row) {
+      if (row.inputValue.trim().length == 0) {
+        row.inputValue = "";
+        row.inputVisible = false;
+        return;
+      }
+      row.attr_vals.push(row.inputValue.trim());
+      row.inputValue = "";
+      row.inputVisible = false;
+      this.saveAttrValues(row);
+    },
+    //删除参数
+    handleClose(index, row) {
+      row.attr_vals.splice(index, 1);
+      this.saveAttrValues(row);
+    },
+    //保存 attr_vals 的操作
+    async saveAttrValues(row) {
+      this.$message.closeAll();
+      const { data: res } = await this.$http.put(
+        `categories/${this.cateId}/attributes/${row.attr_id}`,
+        {
+          attr_name: row.attr_name,
+          attr_sel: row.attr_sel,
+          attr_vals: row.attr_vals.join(" ")
+        }
+      );
+      if (res.meta.status !== 200) return this.$message.error("修改参数失败！");
+      this.$message.success("修改参数成功！");
     }
   },
   computed: {
