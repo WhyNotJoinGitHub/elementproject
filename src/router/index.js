@@ -10,6 +10,7 @@ const Roles = () => import('views/home/childCpns/powerManage/Roles')
 const Categories = () => import('views/home/childCpns/goodsManage/Categories')
 const Params = () => import('views/home/childCpns/goodsManage/Params')
 const Goods = () => import('views/home/childCpns/goodsManage/Goods')
+const Reports = () => import('views/home/childCpns/reports/Reports')
 Vue.use(VueRouter)
 const routes = [
   {
@@ -52,6 +53,10 @@ const routes = [
       {
         path: '/goods',
         component: Goods
+      },
+      {
+        path: '/reports',
+        component: Reports
       }
     ]
   }
