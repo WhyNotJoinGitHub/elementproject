@@ -5,10 +5,12 @@
         v-for="(item,index ) in cities"
         :class="{checked:arr.includes(index)}"
         @click="checkedBox(index)"
-        :key="index">
+        :key="index"
+      >
         <button>{{item}}</button>
-        </li>
+      </li>
     </ul>
+    <div class="a"></div>
   </div>
 </template>
 
@@ -35,6 +37,22 @@ export default {
     }
   }
 };
+
+let arr = [1, 2, 3, 3, 4, 4, 5];
+// let newArr = [...new Set(arr)];
+// console.log(newArr);
+
+function unique(array) {
+  let b = [];
+  for (let i = 0; i < arr.length; i++) {
+    if (b.indexOf(arr[i]) == -1) {
+      b.push(arr[i]);
+    }
+  }
+  return b;
+}
+arr = unique(arr);
+console.log(arr);
 </script>
 
 <style lang="scss" scoped>
@@ -42,8 +60,15 @@ li {
   list-style: none;
   display: inline-block;
 }
-.checked button{
+.checked button {
   background: lightBlue;
   color: #fff;
+}
+.a {
+  width: 0;
+  height: 0;
+  border-width: 20zzpx;
+  border-style: solid;
+  border-color: transparent #0099cc transparent transparent;
 }
 </style>
